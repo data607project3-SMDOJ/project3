@@ -1,0 +1,31 @@
+Keyword,LinkedIn,Indeed,SimplyHired,Monster
+machine learning,"5,701","3,439","2,561","2,340"
+analysis,"5,168","3,500","2,668","3,306"
+statistics,"4,893","2,992","2,308","2,399"
+computer science,"4,517","2,739","2,093","1,900"
+communication,"3,404","2,344","1,791","2,053"
+mathematics,"2,605","1,961","1,497","1,815"
+visualization,"1,879","1,413","1,153","1,207"
+AI composite,"1,568","1,125",811,687
+deep learning,"1,310",979,675,606
+NLP composite,"1,212",910,660,582
+software development,732,627,481,784
+neural networks,671,485,421,305
+data engineering,514,339,276,200
+project management,476,397,330,348
+software engineering,413,295,250,512
+,,,,
+Total,"35,063","23,545","17,975","19,044"
+,,,,
+add AI and artificial intelligence and subtract the overlap search term with both terms in it,,,,
+AI,916,690,508,680
+artificial intelligence,964,754,498,679
+AI + artificial intelligence,312,319,195,672
+,,,,
+add NLP and natural language processing and subtract the overlap search term with both terms in it,,,,
+NLP,643,466,362,576
+natural language processing,791,621,429,575
+NLP + natural language processing,222,177,131,569
+,,,,
+"""data scientist"" ""[keyword]""",,,,
+"Oct 10, 2018",,,,

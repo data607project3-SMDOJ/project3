@@ -1,10 +1,11 @@
 DROP TABLE IF EXISTS temp;
 DROP TABLE IF EXISTS job_info;
-
+DROP TABLE IF EXISTS company_info;
+DROP TABLE IF EXISTS skills;
 
 CREATE TABLE temp(
-	job_id INT NOT NULL AUTO_INCREMENT,
-	Job_Title varchar(255),
+    job_id INT NOT NULL AUTO_INCREMENT,
+    Job_Title varchar(255),
     Queried_Salary varchar(255),
     Job_Type varchar(255),
     Skill longtext,
@@ -13,16 +14,16 @@ CREATE TABLE temp(
     Description longtext,
     Location varchar(100),
     Company_Industry varchar(255),
-    python	int,
+    python int,
     _sql int,
     machine_learning int,
-	r int,
+    r int,
     hadoop int,
     tableau	int,
     sas	int,
     spark int,
-	java int,
-	Others int,
+    java int,
+    Others int,
     PRIMARY KEY (job_id)
 );
 
@@ -43,34 +44,35 @@ SET
 
 CREATE TABLE job_info AS
 SELECT
-	job_id,
+    job_id,
     Job_Title,
     Job_Type,
     Location,
     Queried_Salary,
+    Skill,
     Description
 FROM temp;
 
 CREATE TABLE company_info AS
 SELECT
-	job_id,
+    job_id,
     Company,
     Company_Industry
 FROM temp;
 
 CREATE TABLE skills AS
 SELECT
-	job_id,
+    job_id,
     Skill,
     No_of_Skills,
     python,
     _sql,
     machine_learning,
-	r,
+    r,
     hadoop,
     tableau,
     sas,
     spark,
-	java,
-	Others
+    java,
+    Others
 FROM temp;

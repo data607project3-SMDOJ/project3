@@ -1,0 +1,44 @@
+---
+title: "Untitled"
+author: "Shana Green"
+date: "10/12/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+library(stringr)
+library(dplyr)
+library(tidyr)
+
+library(ggplot2)
+
+```
+
+```{r}
+file_1<-read.csv("https://raw.githubusercontent.com/data607project3-SMDOJ/project3/main/Data/indeed_job_dataset.csv", header=TRUE,stringsAsFactors=FALSE)
+
+
+file_1<-file_1[,-c(4,7,8,9,10,11,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44)]
+head(file_1)
+
+```
+
+```{r}
+file_2<-read.csv("https://raw.githubusercontent.com/data607project3-SMDOJ/project3/main/Data/ds_general_skills_revised.csv", header = TRUE, stringsAsFactors=FALSE)
+
+file_2<-file_2[1:15,]
+file_2
+```
+
+
+```{r}
+#file1_file2<-merge(file_1,file_2,all=TRUE)
+#head(file1_file2)
+
+
+```

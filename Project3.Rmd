@@ -1,0 +1,106 @@
+---
+title: "Project3"
+author: "Dominika Markowska-Desvallons"
+date: "10/16/2020"
+output: html_document
+---
+```{r}
+library(tidyverse)
+library(readxl)
+library(ggplot2)
+```
+```{r setup, include=FALSE}
+db <- read.csv("https://raw.githubusercontent.com/hrensimin05/Data_607/master/indeed_job_dataset.csv",header=T)
+
+view(db)
+
+```
+
+
+```{r}
+counts_sql<- db %>% 
+  count(sql)
+counts_sql
+counts_r<- db %>% 
+  count(r)
+counts_r
+counts_h<- db %>% 
+  count(hadoop)
+counts_h
+counts_j<- db %>% 
+  count(java)
+counts_j
+counts_s<- db %>% 
+  count(sas)
+counts_s
+counts_sp<- db %>% 
+  count(spark)
+counts_sp
+counts_t<- db %>% 
+  count(tableau	)
+counts_t
+counts_m<- db %>% 
+  count("machine learning")
+counts_m
+counts_p<- db %>% 
+  count(python)
+counts_p			
+
+total<-c(3104,2234,1714,1480,941,1531,1236,3325)
+
+```
+```{r}
+total<-c(3104,2234,1714,1480,941,1531,1236,3325)
+barplot(total)
+barplot(total,
+main = "Data Scientist Skills Set",
+xlab = "Skills",
+ylab = "answers",
+names.arg = c("sql", "r", "hadoop", "java", "sas", "spark", "tableau","python"),
+col = "green")
+```
+```{r}
+df1<-read.csv("https://raw.githubusercontent.com/data607project3-SMDOJ/project3/main/Data/ds_general_skills_revised.csv",header=T)
+#view(df1)
+#summary(df1)
+head(df1)
+```
+
+```{r}
+subdat <- df1[df1$Keyword=="analysis", c("LinkedIn", "Indeed", "SimplyHired", "Monster")]
+subdat_l <- data.frame(Value = unlist(subdat),Web = factor(1:4))
+subdat_l
+```
+```{r}
+words <- grep("^Keyword", names(df1), value = TRUE) 
+subdat <- df1[df1$Keyword, words]
+subdat_l <- data.frame(Value = unlist(subdat),
+                       Year = substr(words, 8, nchar(words)))
+str(df1)
+plot(df1)
+
+as.numeric(levels(f))[f]
+#plot(Keyword$analysis~Monster, data=df1)
+#hist(df1$Keyword)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

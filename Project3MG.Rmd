@@ -1,0 +1,94 @@
+---
+title: "Project 3"
+author: "Mark Gonsalves"
+date: "10/16/2020"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(RMySQL)
+library(DBI)
+```
+
+## Project 3
+
+
+
+## Steps
+1) We first pulled the data from Kaggle.com and moved the 2 DB's to our github account.
+2) Then we imported the files into MySQL.  
+3) From MySQL, we will now pull the data into R.
+4) After the data connection was made with MySQL and R, we have then created 2 new dataframes: "db1" and "db2".
+5) We'll quickly look at the dataframes with head() and slice_sample()
+
+
+```{r}
+JobSkills <- DBI::dbConnect(RMySQL::MySQL(), dbname = "DataScience", user="root", port=3306, host='localhost', password="1dodger1")
+
+dbListTables(JobSkills)
+glimpse(JobSkills)
+
+class(dbGetQuery(JobSkills,"SHOW TABLES"))
+dbGetQuery(JobSkills, "SHOW TABLES")
+dbGetQuery(JobSkills, "EXPLAIN ds_general_skills_revised")
+dbGetQuery(JobSkills, "EXPLAIN indeed_job_dataset")
+
+db1 <-dbGetQuery(JobSkills, "SELECT * FROM ds_general_skills_revised")
+db2 <-dbGetQuery(JobSkills, "SELECT * FROM indeed_job_dataset")
+
+head(db1,15)
+head(db2,15)
+slice_sample(db1)
+slice_sample(db2)
+
+```
+
+##Analysis
+
+Now we'll start to analyze and breakdown the data.
+
+We'll start with df1 which has data science skills based on job postings on LinkedIn, Indeed, SimplyHired and Monster
+
+I will first use slicing to remove the rows that are not useful for analysis.
+
+We'll add a new column to sum the skills from the four jobsites.
+We first need to make the job posting columns into numerics.
+
+
+
+```{r}
+slice_sample(db1)
+
+db1a <- db1[1:16,]
+
+head(db1a,15)
+
+db1a %>%
+  as.numeric(LinkedIn) %>%
+  as.numeric(Indeed) %>%
+  as.numeric(SimplyHired) %>%
+  as.numeric(Monster)
+
+# Get a summary of the jobskills for each row
+#db1b %>%
+#  mutate(total_skills = (LinkedIn + Indeed + SimplyHired + Monster))
+
+#Summarize the columns
+
+#db1c %>%
+#  group_by(Keyword) %>%
+#  summarize(
+#    sum(LinkedIn))
+    
+  
+
+
+```
+
+## Now we'll look at the larger dataframe db2.
+
+Db2 is a dataset from job postings on Indeed.com.  The dataset has skills listed in the job postings along with the companies hiring and in many cases the industry they are in.  It further breaks it downby States.
+
+

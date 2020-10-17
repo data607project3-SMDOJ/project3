@@ -1,0 +1,193 @@
+---
+title: "Project 3"
+author: "John Mazon"
+date: "9/26/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+### MYSQL Database integration with R
+
+
+#### Additional packages installed
+Please note below additional packages installed. The formattable package is used to transform vectors and data frames into more readable and impactful tabular formats. 
+Package 'conflicted' solved an issue with the rename func as it pertains to knit/html.
+
+install.packages("formattable")
+install.packages("conflicted")
+
+```{r}
+library(tidyverse)
+library(RMySQL)
+library(formattable)
+
+```
+
+
+```{r}
+##DBconnect was utilized in this assignment to authenticate/pull in the flight delay information into R
+my.database10 = dbConnect(MySQL(), user='root', password = 'Password1', dbname='jobs', host='localhost')
+dbListTables(my.database10)
+
+generalskills_list <- fetch(dbSendQuery(my.database10, "SELECT * FROM general_skills"))
+dim(generalskills_list)
+colnames(generalskills_list)
+summary(generalskills_list)
+
+```
+
+
+
+```{r}
+##DBconnect was utilized in this assignment to authenticate/pull in the flight delay information into R
+my.database10 = dbConnect(MySQL(), user='root', password = 'Password1', dbname='jobs', host='localhost')
+dbListTables(my.database10)
+
+indeed_list <- fetch(dbSendQuery(my.database10, "SELECT * FROM indeed_jobs"))
+dim(indeed_list)
+colnames(indeed_list)
+
+```
+
+Experimented with the tibble func below for the first time. Tibbles have a refined print method that shows only the first 10 rows, and all the columns that fit on screen. This makes it much easier to work with large data.
+```{r}
+library(tidyverse)
+library(dplyr)
+
+
+indeed_listinfo <- as_tibble(indeed_list)
+indeed_listinfo
+
+generalskills_listinfo <- as_tibble(generalskills_list)
+generalskills_listinfo
+
+indeed_listinfo2 <- data.frame(indeed_listinfo$MyUnknownColumn,
+                               indeed_listinfo$Job_Title,
+                               indeed_listinfo$Job_Type,
+                               indeed_listinfo$Skill,
+                               indeed_listinfo$No_of_Skills,
+                               indeed_listinfo$Description,
+                               indeed_listinfo$Location,
+                               indeed_listinfo$Company_Industry,
+                               indeed_listinfo$python,
+                               indeed_listinfo$sql,
+                               indeed_listinfo$r,
+                               indeed_listinfo$hadoop,
+                               indeed_listinfo$tableau,
+                               indeed_listinfo$sas,
+                               indeed_listinfo$spark,
+                               indeed_listinfo$java,
+                               indeed_listinfo$Others,
+                               indeed_listinfo$CA,
+                               indeed_listinfo$NY,
+                               indeed_listinfo$VA,
+                               indeed_listinfo$TX,
+                               indeed_listinfo$MA,
+                               indeed_listinfo$IL,
+                               indeed_listinfo$WA,
+                               indeed_listinfo$MD,
+                               indeed_listinfo$DC,
+                               indeed_listinfo$NC,
+                               indeed_listinfo$Other_states,
+                               indeed_listinfo$`Consulting and Business Services`,
+                               indeed_listinfo$`Internet and Software`,
+                               indeed_listinfo$`Banks and Financial Services`,
+                               indeed_listinfo$`Health Care`,
+                               indeed_listinfo$Insurance,
+                               indeed_listinfo$Other_industries)
+
+(colnames(indeed_listinfo2))
+```
+
+
+```{r}
+library(dplyr)
+
+indeed_listinfo3 <- dplyr::rename(indeed_listinfo2,
+          "ID"="indeed_listinfo.MyUnknownColumn",
+          "Title" = "indeed_listinfo.Job_Title",
+          "Type" = "indeed_listinfo.Job_Type",
+          "Skill" = "indeed_listinfo.Skill",
+          "Skills" = "indeed_listinfo.No_of_Skills",
+          "Description" = "indeed_listinfo.Description",
+          "Location" = "indeed_listinfo.Location",
+          "Industry" = "indeed_listinfo.Company_Industry",
+          "Python" = "indeed_listinfo.python",
+          "SQL" = "indeed_listinfo.sql",
+          "R" = "indeed_listinfo.r",
+          "Hadoop" = "indeed_listinfo.hadoop",
+          "Tableau" = "indeed_listinfo.tableau",
+          "SAS" = "indeed_listinfo.sas",
+          "Spark" = "indeed_listinfo.spark",
+          "Java" = "indeed_listinfo.java",
+          "Others" = "indeed_listinfo.Others",
+          "CA" = "indeed_listinfo.CA",
+          "NY" = "indeed_listinfo.NY",
+          "VA" = "indeed_listinfo.VA",
+          "TX" = "indeed_listinfo.TX",
+          "MA" = "indeed_listinfo.MA",
+          "IL" = "indeed_listinfo.IL",
+          "WA" = "indeed_listinfo.WA",
+          "MD" = "indeed_listinfo.MD",
+          "DC" = "indeed_listinfo.DC",
+          "NC" = "indeed_listinfo.NC",
+          "Other" = "indeed_listinfo.Other_states",
+          "Consulting" = "indeed_listinfo..Consulting.and.Business.Services.",
+          "Internet" = "indeed_listinfo..Internet.and.Software.",
+          "Financial" = "indeed_listinfo..Banks.and.Financial.Services.",
+          "Healthcare" = "indeed_listinfo..Health.Care.",
+          "Insurance" = "indeed_listinfo.Insurance",
+          "Varied" = "indeed_listinfo.Other_industries"
+
+)
+
+
+
+table(indeed_listinfo3$Python)
+table(indeed_listinfo3$SQL)
+table(indeed_listinfo3$R)
+table(indeed_listinfo3$Hadoop)
+table(indeed_listinfo3$Tableau)
+table(indeed_listinfo3$SAS)
+table(indeed_listinfo3$Spark)
+table(indeed_listinfo3$Java)
+table(indeed_listinfo3$Others)
+
+library(data.table)
+
+setDT(indeed_listinfo3)[, .N, by=Python]
+setDT(indeed_listinfo3)[, .N, by=SQL]
+setDT(indeed_listinfo3)[, .N, by=R]
+setDT(indeed_listinfo3)[, .N, by=Hadoop]
+setDT(indeed_listinfo3)[, .N, by=Tableau]
+setDT(indeed_listinfo3)[, .N, by=SAS]
+setDT(indeed_listinfo3)[, .N, by=Spark]
+setDT(indeed_listinfo3)[, .N, by=Python]
+setDT(indeed_listinfo3)[, .N, by=Java]
+
+
+
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

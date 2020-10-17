@@ -65,22 +65,24 @@ db1a <- db1[1:16,]
 
 head(db1a,15)
 
-db1a %>%
-  as.numeric(LinkedIn) %>%
-  as.numeric(Indeed) %>%
-  as.numeric(SimplyHired) %>%
-  as.numeric(Monster)
+db1a$LinkedIn<- suppressWarnings(as.numeric(gsub(",","",db1a$LinkedIn)))
+db1a$Indeed<- suppressWarnings(as.numeric(gsub(",","",db1a$Indeed)))
+db1a$SimplyHired<- suppressWarnings(as.numeric(gsub(",","",db1a$SimplyHired)))
+db1a$Monster<-suppressWarnings(as.numeric(gsub(",","",db1a$Monster)))
+
+
+
 
 # Get a summary of the jobskills for each row
-#db1b %>%
+#db1a %>%
 #  mutate(total_skills = (LinkedIn + Indeed + SimplyHired + Monster))
 
 #Summarize the columns
 
-#db1c %>%
-#  group_by(Keyword) %>%
-#  summarize(
-#    sum(LinkedIn))
+db1a %>%
+  group_by(Keyword) %>%
+  summarize(
+    sum(LinkedIn+Indeed+SimplyHired+Monster))
     
   
 

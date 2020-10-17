@@ -79,9 +79,43 @@ subdat_l <- data.frame(Value = unlist(subdat),
 str(df1)
 plot(df1)
 
-as.numeric(levels(f))[f]
+#as.numeric(levels(f))[f]
+
+ 
+
 #plot(Keyword$analysis~Monster, data=df1)
 #hist(df1$Keyword)
+```
+```{r}
+df3<-df1[1:15,]
+df3
+
+
+df3$LinkedIn<- suppressWarnings(as.numeric(gsub(",","",df3$LinkedIn)))
+
+
+df3$Indeed<- suppressWarnings(as.numeric(gsub(",","",df3$Indeed)))
+df3$SimplyHired<- suppressWarnings(as.numeric(gsub(",","",df3$SimplyHired)))
+df3$Monster<-suppressWarnings(as.numeric(gsub(",","",df3$Monster)))
+
+str(df3)
+table(df3)
+```
+
+```{r}
+par(mar=c(2,4,6,8))
+count <- table(df3$Keyword, df3$Monster)
+barplot(count, main="Monster webpage skills",
+  xlab="Skills", col=c("blue","red","orange"),
+  legend = rownames(count))
+```
+```{r}
+barplot(df3$Monster,
+main = "Data Scientist Skills Set from Monster",
+xlab = "Skills",
+ylab = "answers",
+names.arg = c(df3$Keyword),
+col = "green")
 ```
 
 

@@ -3,6 +3,10 @@
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 library(RMySQL)
+library(tidyverse)
+library(magrittr)
+library(reshape2)
+library(knitr)
 ```
 
 ```{r mysql setup}
@@ -16,5 +20,111 @@ dbListTables(db)
 
 #assigning variables to each table
 indeed <- dbReadTable(db, "indeed")
+general_skills <- na.omit(dbReadTable(db, "general_skills"))
+```
+
+### Frequency of Skills
+```{r}
+indeed_skills <- indeed$Skill %>% 
+  str_remove_all("\\[|\\]|\\'") %>%
+  str_trim() %>%
+  str_split(",") %>%
+  unlist() %>%
+  str_trim() %>%
+  table() %>%
+  as.data.frame() %>%
+  set_colnames(c("skill", "frequency")) %>%
+  arrange(desc(frequency)) %>%
+  mutate(proportion = frequency / sum(frequency))
+
+#graph of top 15 skills overall
+indeed_skills %>%
+  slice(1:15) %>%
+ggplot(., aes(x = reorder(skill, frequency), y = frequency)) +
+  geom_bar(stat = "identity") +
+  coord_flip() +
+  ggtitle("Top 15 Skills overall") +
+  xlab("skill")
+
+```
+
+### SKills vs Job Type
+```{r, warnings = FALSE}
+#subsetting data
+job_vs_skill <- indeed %>% 
+  select(Job_Type, Skill) 
+
+#cleaning skills column
+job_vs_skill$Skill <- job_vs_skill$Skill %>%
+  str_remove_all("\\[|\\]|\\'") %>%
+  str_trim() %>%
+  str_split(",") 
+
+#cleaning job type columns
+job_vs_skill$Job_Type <- job_vs_skill$Job_Type %>%
+  str_replace_all("_", " ")
+
+#unnesting   
+job_vs_skill <- job_vs_skill %>% unnest(Skill) 
+
+#removing white space
+job_vs_skill$Skill <- trimws(job_vs_skill$Skill, which = c("both"))
+
+#finding frequencies and proportions
+job_vs_skill <- job_vs_skill %>%
+  group_by(Job_Type, Skill) %>%
+  summarise(freq = n()) %>%
+  mutate(proportion = freq/ sum(freq),
+         label = round(proportion * 100, 2))
+
+#top 10 skills by job type redo
+job_vs_skill %>%
+  group_by(Skill) %>%
+  mutate(overall = sum(freq)) %>%
+  arrange(desc(overall)) %>%
+  ungroup() %>%
+  slice(1:45) %>%
+ggplot(., aes(x = reorder(Skill, overall), y = freq, fill = Job_Type)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  coord_flip() +
+  theme(axis.text.x = element_blank(), axis.ticks = element_blank()) +
+  xlab("skill") +
+  ggtitle("Distribution of Skills by Job Type")
+
+#top 10 skills by job type
+job_vs_skill2 <- job_vs_skill %>%
+  group_by(Job_Type) %>%
+  top_n(10, proportion) %>%
+  ungroup() %>%
+  arrange(Job_Type, desc(proportion))
+
+#graph of the top 10 skills by job type
+ggplot(job_vs_skill2) + 
+  geom_bar(aes(x = Skill, y = proportion, fill = Job_Type), stat = "identity", 
+           position = position_fill(reverse = TRUE)) +
+  coord_flip() +
+  ggtitle("Distribution of Skills by Job Type")
+
+#3 different graphs of top 10 skills by job type
+ggplot(job_vs_skill2) + 
+  geom_bar(aes(x = reorder(Skill, proportion), y = proportion, fill = Job_Type), stat = "identity") +
+  coord_flip() +
+  facet_wrap(~Job_Type, scales = "free") +
+  ggtitle("Distribution of Skills by Job Type") +
+  geom_text(aes(x = reorder(Skill, proportion), y = proportion, label = label, group = Job_Type),
+            position = position_stack(vjust = .5, reverse = TRUE), size = 3) +
+  theme(axis.text.x = element_blank(), axis.ticks = element_blank(), legend.position = "none")
+
+#Data Scientist top 15 jobs
+job_vs_skill %>%
+  filter(Job_Type == "data scientist") %>%
+  top_n(15, freq) %>%
+  arrange(desc(freq))%>%
+  select(-label) %>%
+  kable()
+```
+### General Skills
+```{r}
+
 ```
 

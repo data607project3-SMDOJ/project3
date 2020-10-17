@@ -118,8 +118,24 @@ names.arg = c(df3$Keyword),
 col = "green")
 ```
 
+```{r}
+barplot(df3$Indeed,
+main = "Data Scientist Skills Set from Monster",
+xlab = "Skills",
+ylab = "answers",
+names.arg = c(df3$Keyword),
+col = "blue")
 
+```
 
+```{r}
+barplot(df3$LinkedIn,
+main = "Data Scientist Skills Set from Monster",
+xlab = "Skills",
+ylab = "answers",
+names.arg = c(df3$Keyword),
+col = "orange")
+```
 
 
 

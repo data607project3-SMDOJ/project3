@@ -1,9 +1,6 @@
-DROP TABLE IF EXISTS temp;
-DROP TABLE IF EXISTS job_info;
-DROP TABLE IF EXISTS company_info;
-DROP TABLE IF EXISTS skills;
+DROP TABLE IF EXISTS indeed;
 
-CREATE TABLE temp(
+CREATE TABLE indeed(
     job_id INT NOT NULL AUTO_INCREMENT,
     Job_Title varchar(255),
     Queried_Salary varchar(255),
@@ -14,21 +11,21 @@ CREATE TABLE temp(
     Description longtext,
     Location varchar(100),
     Company_Industry varchar(255),
-    python int,
+    python	int,
     _sql int,
     machine_learning int,
-    r int,
+	r int,
     hadoop int,
     tableau	int,
     sas	int,
     spark int,
-    java int,
-    Others int,
+	java int,
+	Others int,
     PRIMARY KEY (job_id)
 );
 
 LOAD DATA INFILE 'C:/ProgramData/MySQL/MySQL Server 8.0/Uploads/indeed_job_dataset.csv'
-INTO TABLE temp
+INTO TABLE indeed
 FIELDS TERMINATED BY ','
 ENCLOSED BY '"'
 LINES TERMINATED BY '\n'
@@ -42,37 +39,3 @@ SET
 	Skill = nullif(@Skill, ''),
 	Location = nullif(@Location, '');
 
-CREATE TABLE job_info AS
-SELECT
-    job_id,
-    Job_Title,
-    Job_Type,
-    Location,
-    Queried_Salary,
-    Skill,
-    Description
-FROM temp;
-
-CREATE TABLE company_info AS
-SELECT
-    job_id,
-    Company,
-    Company_Industry
-FROM temp;
-
-CREATE TABLE skills AS
-SELECT
-    job_id,
-    Skill,
-    No_of_Skills,
-    python,
-    _sql,
-    machine_learning,
-    r,
-    hadoop,
-    tableau,
-    sas,
-    spark,
-    java,
-    Others
-FROM temp;

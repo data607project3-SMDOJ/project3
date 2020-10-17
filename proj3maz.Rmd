@@ -1,0 +1,65 @@
+---
+title: "Project 3"
+author: "John Mazon"
+date: "9/26/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+### MYSQL Database integration with R
+
+The MYSQL database table created for this assignment contains arrival delays for two airlines across five destinations
+
+#### Additional packages installed
+Please note below additional packages installed. The formattable package is used to transform vectors and data frames into more readable and impactful tabular formats. 
+Package 'conflicted' solved an issue with the rename func as it pertains to knit/html.
+
+install.packages("formattable")
+install.packages("conflicted")
+
+```{r}
+library(tidyverse)
+library(RMySQL)
+library(formattable)
+
+```
+
+
+```{r}
+##DBconnect was utilized in this assignment to authenticate/pull in the flight delay information into R
+my.database1 = dbConnect(MySQL(), user='root', password = 'Password1', dbname='jobs', host='localhost')
+dbListTables(my.database1)
+
+```
+Using fetch function we are able to select all the row from our flightsandstatus database [table = airlines_info1]
+```{r}
+jobs_list <- fetch(dbSendQuery(my.database1, "SELECT * FROM job"))
+dim(jobs_list)
+colnames(jobs_list)
+summary(jobs_list)
+jobs_list
+```
+
+Experimented with the tibble func below for the first time. Tibbles have a refined print method that shows only the first 10 rows, and all the columns that fit on screen. This makes it much easier to work with large data.
+```{r}
+jobs_listinfo <- as_tibble(jobs_list)
+jobs_listinfo
+
+```
+Note the use of the conflicted library below was helpful in tackling a difficult issue of knitting to html with the rename func used in our R code. Similarly from assignment 2, it is ideal for us to rename often time certain data which is not easy to understand/or to better the appearance of certain data such as columns. Also note the dplyr::rename being utilized in this scenario.
+```{r}
+library(conflicted)
+library(dplyr)
+
+jobs_listinfo9 <- dplyr::rename(jobs_listinfo,"Title"="Job_Title",
+          "Salary" = "Queried_Salary",
+          "Type" = "Job_Type",
+          "ID" = "MyUnknownColumn"
+)
+
+print(jobs_listinfo9)
+
+```

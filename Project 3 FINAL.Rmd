@@ -1,0 +1,227 @@
+---
+title: "Project 3: Data Scientist Skills"
+authors: "John Mazon, Orli Khaimova, Shana Green, Dominika Markowska-Desvallons, Mark Gonsalves"
+output: html_document
+---
+
+Team Members: John Mazon, Orli Khaimova, Shana Green, Dominika Markowska-Desvallons, Mark Gonsalves
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(RMySQL)
+library(tidyverse)
+library(magrittr)
+library(reshape2)
+library(knitr)
+library(wordcloud)
+library(RColorBrewer)
+```
+
+### Introduction
+
+This project’s goal is to determine the most valued data science skills.  To do this, we pulled data from [Kaggle.com](https://www.kaggle.com/elroyggj/indeed-dataset-data-scientistanalystengineer?select=indeed_job_dataset.csv).
+ 
+The key steps for this project were:
+
+1. We first pulled the data from Kaggle.com and moved the data to our GitHub.com [account](https://github.com/data607project3-SMDOJ/project3).  The data we focused on are job postings for Data Analysts, Data Engineers and Data Scientists on indeed.com from November 2018.
+
+2. Then we imported the file from GitHub.com into MySQL.  
+
+3.  From MySQL, we pulled the data into R using the `RMySQL` package.
+
+4.  After the data connection was made with MySQL and R, we have then created a new data frame `indeed` and then assigned it as indeed.
+
+5.  Once we had the data in R, we then proceeded to tidy and transform the data as was necessary to analyze and produce the results you see below. 
+
+
+### MySQL Loading
+
+We uploaded the csv files into MySQL and created tables accordingly. Since the original csv had over 40 columns, we shortened it to the variables we thought would be of interest in our analysis. 
+
+
+```{r mysql setup}
+db <- dbConnect(MySQL(), user='root', password=.rs.askForPassword("Enter password:"), 
+                dbname='project_3', host='localhost')
+
+summary(db)
+
+#lists the tables in the database
+dbListTables(db)
+
+#assigning variables to each table
+indeed <- dbReadTable(db, "indeed")
+```
+
+### Frequency of Skills Overall
+
+Upon loading the `indeed` database from MySQL into R, the `Skill` column tab needed some tidying. From there, we removed all strings, trimmed, and split the string into pieces with commas. Doing this will ultimately lead us into converting the list into a vector using the `unlist` function. We proceeded to trim the function again, created a table to count the frequencies,  and set it as a data frame. New column names were created, and we wanted to arrange the frequency of skills in descending order. Lastly, we mutated a new column to view the proportions between the frequency and the sum of the frequencies per skill. 
+
+The goal was to create a graph to give an overall view of job skills between a Data Scientists, Data Analysts, and Data Engineers. We decided to slice the data frame and focus only on the top 15 skills. The top 15 skills between all three fields are listed below.
+
+```{r}
+indeed_skills <- indeed$Skill %>% 
+  str_remove_all("\\[|\\]|\\'") %>%
+  str_trim() %>%
+  str_split(",") %>%
+  unlist() %>%
+  str_trim() %>%
+  table() %>%
+  as.data.frame() %>%
+  set_colnames(c("skill", "frequency")) %>%
+  arrange(desc(frequency)) %>%
+  mutate(proportion = frequency / sum(frequency))
+
+#graph of top 15 skills overall
+indeed_skills %>%
+  slice(1:15) %>%
+ggplot(., aes(x = reorder(skill, frequency), y = frequency)) +
+  geom_bar(stat = "identity", fill = "#00A572") +
+  coord_flip() +
+  ggtitle("Top 15 Skills for Data Scientists, Data Analysts, and Data Engineers") +
+  xlab("skill")
+```
+
+### Breakdown by job type
+
+The first step was to subset the data frame.  Then we cleaned the `skills` column using regular expressions to remove the `[]`.  We then trimmed the data and split the string.  Next, we cleaned the job type columns and unnested the skills.  Then we removed the white spaces and found the frequencies and proportions.  The final step was to find the top 10 skills for each of our subjects: Data Analysts, Data Engineers and Data Scientists.  We then graphed the results with `ggplot2`.
+
+The results showed that Data Scientists are most valued for the Python, Machine Learning, R and SQL skills.  Data Analysts were valued for the SQL, Python, Tableau and R skills and Data Engineers were valued for their Python, SQL, Hadoop and Spark skills.
+
+```{r, warning = FALSE}
+#subsetting data
+job_vs_skill <- indeed %>% 
+  select(job_id, Job_Type, Skill) 
+
+#cleaning skills column
+job_vs_skill$Skill <- job_vs_skill$Skill %>%
+  str_remove_all("\\[|\\]|\\'") %>%
+  str_trim() %>%
+  str_split(",") 
+
+#cleaning job type columns
+job_vs_skill$Job_Type <- job_vs_skill$Job_Type %>%
+  str_replace_all("_", " ")
+
+#unnesting   
+job_vs_skill <- job_vs_skill %>% unnest(Skill) 
+
+#removing white space
+job_vs_skill$Skill <- trimws(job_vs_skill$Skill, which = c("both"))
+
+#finding frequencies and proportions
+job_vs_skill <- job_vs_skill %>%
+  group_by(Job_Type, Skill) %>%
+  summarise(freq = n()) %>%
+  mutate(proportion = freq/ sum(freq),
+         label = round(proportion * 100, 2))
+
+#top 10 skills by job type
+job_vs_skill2 <- job_vs_skill %>%
+  group_by(Job_Type) %>%
+  top_n(10, proportion) %>%
+  ungroup() %>%
+  arrange(Job_Type, desc(proportion))
+
+ggplot(job_vs_skill2) + 
+  geom_bar(aes(x = reorder(Skill, proportion), y = proportion, fill = Job_Type), stat = "identity") +
+  coord_flip() +
+  facet_wrap(~Job_Type, scales = "free") +
+  ggtitle("Distribution of Skills by Job Type") +
+  geom_text(aes(x = reorder(Skill, proportion), y = proportion, label = label, group = Job_Type),
+            position = position_stack(vjust = .5, reverse = TRUE), size = 3) +
+  theme(axis.text.x = element_blank(), axis.ticks = element_blank(), legend.position = "none") +
+  ylab("") +
+  xlab("Skill")
+```
+
+### Top 15 Data Scientist Skills
+
+Our next analysis was to look at the top 15 data scientist skills only. We filtered the data to the top 15 skills and then graphed the results.
+
+We achieved this by using the `jobs_vs_skill` data frame we have filtered out according to `Job_Type` and based only on Data Scientists. We selected the top 15 of the most sought out skills for data scientists. Then we arranged according to the frequency in descending order. Using `GGPLOT` we depicted based on x equaling our skill and y equaling it’s frequency. For a more presentable depiction of the data we decided to add a color blue fill.   
+
+
+```{r}
+job_vs_skill %>%
+  filter(Job_Type == "data scientist") %>%
+  top_n(15, freq) %>%
+  arrange(desc(freq)) %>%
+ggplot(., aes(x = reorder(Skill, freq), y = freq)) +
+  geom_bar(stat = "identity", fill = "#2164f4") +
+  coord_flip() +
+  ggtitle("Top 15 Most Valued Skills for Data Scientists") +
+  xlab("skill") +
+  ylab("frequency")
+```
+### Skill Frequency for Data Scientists
+
+We included a word cloud to show the frequencies of each skill. The bigger the words, the more frequent they appear in the data.
+
+```{r, warning = FALSE}
+ds_skills <- job_vs_skill %>%
+  filter(Job_Type == "data scientist")
+  
+set.seed(57641)
+
+wordcloud(words = ds_skills$Skill, freq = ds_skills$freq, min.freq = 1, 
+          max.words=340, random.order=FALSE, rot.per=0.35, colors=brewer.pal(8, "Set2"))
+```
+
+### Data Science Skills Across Different Industries
+
+We also wanted to see how the skills varies between different company industries for data scientists. We selected the industries that had the most data on the skills. The top 4 skills were the same across the five industries. However, we start to see a difference on the skills that come afterwards.
+
+```{r}
+#subsetting data
+ds_industry <- indeed %>% 
+  select(Job_Type, Skill, Company_Industry) 
+
+#cleaning skills column
+ds_industry$Skill <- ds_industry$Skill %>%
+  str_remove_all("\\[|\\]|\\'") %>%
+  str_trim() %>%
+  str_split(",") 
+
+#unnesting   
+ds_industry <- ds_industry %>% unnest(Skill) 
+
+#removing white space
+ds_industry$Skill <- trimws(ds_industry$Skill, which = c("both"))
+
+#cleaning job type columns
+ds_industry$Job_Type <- ds_industry$Job_Type %>%
+  str_replace_all("_", " ") 
+
+#finding frequencies and proportions
+ds_industry <- ds_industry %>%
+  filter(Job_Type == "data scientist") %>%
+  group_by(Company_Industry, Skill) %>%
+  summarise(freq = n()) %>%
+  mutate(proportion = freq/ sum(freq),
+         label = round(proportion * 100, 2))
+
+#top 10 skills by company industry
+ds_industry <- ds_industry %>%
+  filter(Company_Industry %in% c("Consulting and Business Services", "Internet and Software",
+                               "Banks and Financial Services", "Health Care", "Insurance")) %>%
+  group_by(Company_Industry) %>%
+  top_n(7, proportion) %>%
+  ungroup() %>%
+  arrange(Company_Industry, desc(proportion))
+
+ggplot(ds_industry) + 
+  geom_bar(aes(x = reorder(Skill, proportion), y = proportion, fill = Company_Industry), stat = "identity") +
+  coord_flip() +
+  facet_wrap(~Company_Industry, scales = "free", ncol = 2) +
+  ggtitle("Distribution of Skills by Job Type") +
+  geom_text(aes(x = reorder(Skill, proportion), y = proportion, label = label, group = Company_Industry),
+            position = position_stack(vjust = .5, reverse = TRUE), size = 3) +
+  theme(axis.text.x = element_blank(), axis.ticks = element_blank(), legend.position = "none") +
+  ylab("") +
+  xlab("Skill")
+```
+
+### Conclusion
+
+Looking at the results of the 15 most valued skills for data scientists, we see that Python, Machine Learning, R, SQL, and Hadoop are the skills that lead the pack.  These skills were all valued by data analysts and engineers as well, but not as highly as for data scientists. We then saw that the job industries for data scientists require Machine Learning, Python, R, and SQL the most, with a few differences in between.
+

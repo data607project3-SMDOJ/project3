@@ -123,6 +123,57 @@ job_vs_skill %>%
   select(-label) %>%
   kable()
 ```
+
+```{r}
+#subsetting data
+ds_industry <- indeed %>% 
+  select(Job_Type, Skill, Company_Industry) 
+
+#cleaning skills column
+ds_industry$Skill <- ds_industry$Skill %>%
+  str_remove_all("\\[|\\]|\\'") %>%
+  str_trim() %>%
+  str_split(",") 
+
+#unnesting   
+ds_industry <- ds_industry %>% unnest(Skill) 
+
+#removing white space
+ds_industry$Skill <- trimws(ds_industry$Skill, which = c("both"))
+
+#cleaning job type columns
+ds_industry$Job_Type <- ds_industry$Job_Type %>%
+  str_replace_all("_", " ") 
+
+#finding frequencies and proportions
+ds_industry <- ds_industry %>%
+  filter(Job_Type == "data scientist") %>%
+  group_by(Company_Industry, Skill) %>%
+  summarise(freq = n()) %>%
+  mutate(proportion = freq/ sum(freq),
+         label = round(proportion * 100, 2))
+
+#top 10 skills by company industry
+ds_industry <- ds_industry %>%
+  filter(Company_Industry %in% c("Consulting and Business Services", "Internet and Software",
+                               "Banks and Financial Services", "Health Care", "Insurance")) %>%
+  group_by(Company_Industry) %>%
+  top_n(7, proportion) %>%
+  ungroup() %>%
+  arrange(Company_Industry, desc(proportion))
+
+ggplot(ds_industry) + 
+  geom_bar(aes(x = reorder(Skill, proportion), y = proportion, fill = Company_Industry), stat = "identity") +
+  coord_flip() +
+  facet_wrap(~Company_Industry, scales = "free", ncol = 2) +
+  ggtitle("Distribution of Skills by Job Type") +
+  geom_text(aes(x = reorder(Skill, proportion), y = proportion, label = label, group = Company_Industry),
+            position = position_stack(vjust = .5, reverse = TRUE), size = 3) +
+  theme(axis.text.x = element_blank(), axis.ticks = element_blank(), legend.position = "none") +
+  ylab("") +
+  xlab("Skill")
+```
+
 ### General Skills
 ```{r}
 
